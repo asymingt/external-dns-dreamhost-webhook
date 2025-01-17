@@ -5,7 +5,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	dhapi "github.com/adamantal/go-dreamhost/api"
-	"regexp"
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/plan"
 	"sigs.k8s.io/external-dns/provider"
@@ -45,7 +44,6 @@ func NewProvider(providerConfig *Configuration) *DreamhostProvider {
 // Global functions
 
 func GetDomainFilter(config Configuration) endpoint.DomainFilter {
-	var domainFilter endpoint.DomainFilter
 	createMsg := "Creating Dreamhost provider with "
 	if len(config.DomainFilter) > 0 {
 		createMsg += fmt.Sprintf("include filter: '%s', ", strings.Join(config.DomainFilter, ","))
@@ -67,8 +65,8 @@ func (p *DreamhostProvider) Records(ctx context.Context) ([]*endpoint.Endpoint, 
 
 	var endpoints []*endpoint.Endpoint
 	for _, r := range records {
-		if p.SupportedRecordType(r.Type) && p.domainFilter.Match(r.Record) {
-			endpoints = append(endpoints, endpoint.NewEndpoint(r.Record, r.Type, r.Value))
+		if provider.SupportedRecordType(string(r.Type)) && p.domainFilter.Match(r.Record) {
+			endpoints = append(endpoints, endpoint.NewEndpoint(string(r.Record), string(r.Type), string(r.Value)))
 		}
 	}
 
@@ -80,17 +78,17 @@ func (p *DreamhostProvider) AdjustEndpoints(endpoints []*endpoint.Endpoint) ([]*
 	for _, ep := range endpoints {
 		adjustedTargets := endpoint.Targets{}
 		for _, t := range ep.Targets {
-			err = p.client.RemoveDNSRecord(ctx, dhapi.DNSRecordInput{
+			err := p.client.RemoveDNSRecord(context.Background(), dhapi.DNSRecordInput{
 				Record: ep.DNSName,
-				Type:   t.RecordType,
+				Type:   dhapi.RecordType(ep.RecordType),
 				Value:  t,
 			})
 			if err != nil {
 				log.Warning(err)
 			}
-			err = p.client.AddDNSRecord(ctx, dhapi.DNSRecordInput{
+			err = p.client.AddDNSRecord(context.Background(), dhapi.DNSRecordInput{
 				Record: ep.DNSName,
-				Type:   t.RecordType,
+				Type:   dhapi.RecordType(ep.RecordType),
 				Value:  t,
 			})
 			if err != nil {
@@ -106,11 +104,11 @@ func (p *DreamhostProvider) AdjustEndpoints(endpoints []*endpoint.Endpoint) ([]*
 }
 
 func (p *DreamhostProvider) ApplyChanges(ctx context.Context, changes *plan.Changes) error {
-	for _, ep := range append(changes.Delete, changes.UpdateOld) {
+	for _, ep := range append(changes.Delete, changes.UpdateOld...) {
 		for _, t := range ep.Targets {
-			err = p.client.RemoveDNSRecord(ctx, dhapi.DNSRecordInput{
+			err := p.client.RemoveDNSRecord(ctx, dhapi.DNSRecordInput{
 				Record: ep.DNSName,
-				Type:   t.RecordType,
+				Type:   dhapi.RecordType(ep.RecordType),
 				Value:  t,
 			})
 			if err != nil {
@@ -118,11 +116,11 @@ func (p *DreamhostProvider) ApplyChanges(ctx context.Context, changes *plan.Chan
 			}
 		}
 	}
-	for _, ep := range append(changes.Create, changes.UpdateNew) {
+	for _, ep := range append(changes.Create, changes.UpdateNew...) {
 		for _, t := range ep.Targets {
-			err = p.client.AddDNSRecord(ctx, dhapi.DNSRecordInput{
+			err := p.client.AddDNSRecord(ctx, dhapi.DNSRecordInput{
 				Record: ep.DNSName,
-				Type:   t.RecordType,
+				Type:   dhapi.RecordType(ep.RecordType),
 				Value:  t,
 			})
 			if err != nil {
