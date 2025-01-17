@@ -1,0 +1,38 @@
+version: 2
+
+builds:
+  - main: ./cmd/webhook
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath #removes all file system paths from the compiled executable
+
+    goos:
+      - linux
+      - darwin
+
+    goarch:
+      - amd64
+      - arm64
+
+
+checksum:
+  name_template: "{{ .ProjectName }}_v{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ .ProjectName }}_v{{ .Version }}"
+
+changelog:
+  sort: asc
+
+dockers:
+  - dockerfile: Dockerfile
+    image_templates:
+      - "asymingt/external-dns-dreamhost-webhook:latest"
+      - "asymingt/external-dns-dreamhost-webhook:{{ .Tag }}"
+
+release:
+  github:
+    owner: asymingt
+    name: external-dns-dreamhost-webhook
