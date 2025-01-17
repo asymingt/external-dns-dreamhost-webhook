@@ -1,17 +1,10 @@
 # ExternalDNS - Dreamhost Webhook
 
-ExternalDNS is a Kubernetes add-on for automatically managing
-Domain Name System (DNS) records for Kubernetes services by using different DNS providers.
-By default, Kubernetes manages DNS records internally,
-but ExternalDNS takes this functionality a step further by delegating the management of DNS records to an external DNS
-provider such as this one.
-Therefore, the Dreamhost webhook allows to manage your
-Dreamhost domains inside your kubernetes cluster with [ExternalDNS](https://github.com/kubernetes-sigs/external-dns).
+ExternalDNS is a Kubernetes add-on for automatically managing Domain Name System (DNS) records for Kubernetes services by using different DNS providers. By default, Kubernetes manages DNS records internally, but ExternalDNS takes this functionality a step further by delegating the management of DNS records to an external DNS provider such as this one. Therefore, the Dreamhost webhook allows to manage your Dreamhost domains inside your kubernetes cluster with [ExternalDNS](https://github.com/kubernetes-sigs/external-dns).
 
-To use ExternalDNS with Dreamhost, you need your Dreamhost API token of the account managing
-your domains.
-For detailed technical instructions on how the Dreamhost webhook is deployed using the Bitnami Helm charts for ExternalDNS,
-see[deployment instructions](#kubernetes-deployment).
+To use ExternalDNS with Dreamhost, you need your Dreamhost API token of the account managing your domains, which you can generate by visiting [this page](https://panel.dreamhost.com/?tree=home.api) on the Dreamhost website.
+
+For detailed technical instructions on how the Dreamhost webhook is deployed using the Bitnami Helm charts for ExternalDNS, see[deployment instructions](#kubernetes-deployment).
 
 ## Kubernetes Deployment
 

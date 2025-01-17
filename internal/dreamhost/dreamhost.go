@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	dhapi "github.com/adamantal/go-dreamhost/api"
+	"regexp"
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/plan"
 	"sigs.k8s.io/external-dns/provider"
@@ -19,12 +20,14 @@ type DreamhostProvider struct {
 	DryRun 				bool
 }
 
-// Configuration contains the Vultr provider's configuration.
+// Configuration contains the Dreamhost provider's configuration.
 type Configuration struct {
 	ApiKey               string   `env:"DREAMHOST_API_KEY" required:"true"`
 	DryRun               bool     `env:"DRY_RUN" default:"false"`
 	DomainFilter         []string `env:"DOMAIN_FILTER" default:""`
 	ExcludeDomains       []string `env:"EXCLUDE_DOMAIN_FILTER" default:""`
+	RegexDomainFilter    string   `env:"REGEXP_DOMAIN_FILTER" default:""`
+	RegexDomainExclusion string   `env:"REGEXP_DOMAIN_FILTER_EXCLUSION" default:""`
 }
 
 // Constructor
@@ -44,15 +47,34 @@ func NewProvider(providerConfig *Configuration) *DreamhostProvider {
 // Global functions
 
 func GetDomainFilter(config Configuration) endpoint.DomainFilter {
+	var domainFilter endpoint.DomainFilter
 	createMsg := "Creating Dreamhost provider with "
-	if len(config.DomainFilter) > 0 {
-		createMsg += fmt.Sprintf("include filter: '%s', ", strings.Join(config.DomainFilter, ","))
+
+	if config.RegexDomainFilter != "" {
+		createMsg += fmt.Sprintf("Regexp domain filter: '%s', ", config.RegexDomainFilter)
+		if config.RegexDomainExclusion != "" {
+			createMsg += fmt.Sprintf("with exclusion: '%s', ", config.RegexDomainExclusion)
+		}
+		domainFilter = endpoint.NewRegexDomainFilter(
+			regexp.MustCompile(config.RegexDomainFilter),
+			regexp.MustCompile(config.RegexDomainExclusion),
+		)
+	} else {
+		if len(config.DomainFilter) > 0 {
+			createMsg += fmt.Sprintf("zoneNode filter: '%s', ", strings.Join(config.DomainFilter, ","))
+		}
+		if len(config.ExcludeDomains) > 0 {
+			createMsg += fmt.Sprintf("Exclude domain filter: '%s', ", strings.Join(config.ExcludeDomains, ","))
+		}
+		domainFilter = endpoint.NewDomainFilterWithExclusions(config.DomainFilter, config.ExcludeDomains)
 	}
-	if len(config.ExcludeDomains) > 0 {
-		createMsg += fmt.Sprintf("exclude filter: '%s', ", strings.Join(config.ExcludeDomains, ","))
+
+	createMsg = strings.TrimSuffix(createMsg, ", ")
+	if strings.HasSuffix(createMsg, "with ") {
+		createMsg += "no kind of domain filters"
 	}
 	log.Info(createMsg)
-	return endpoint.NewDomainFilterWithExclusions(config.DomainFilter, config.ExcludeDomains)
+	return domainFilter
 }
 
 // Functions called by the 
