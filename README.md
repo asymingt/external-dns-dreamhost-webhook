@@ -50,7 +50,7 @@ extraArgs:
 
 sidecars:
   - name: dreamhost-webhook
-    image: ghcr.io/asymingt/external-dns-dreamhost-webhook:v0.1.1
+    image: asymingt/external-dns-dreamhost-webhook:v0.1.2
     ports:
       - containerPort: 8888
         name: webhook
@@ -101,8 +101,8 @@ provider:
   name: webhook
   webhook:
     image:
-      repository: ghcr.io/asymingt/external-dns-dreamhost-webhook
-      tag: v0.1.1
+      repository: asymingt/external-dns-dreamhost-webhook
+      tag: v0.1.2
     env:
       - name: DREAMHOST_API_KEY
         valueFrom:
