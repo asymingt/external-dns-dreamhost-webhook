@@ -1,15 +1,16 @@
+import flask
 import json
 import requests
 import os
 import pandas as pd
-from flask import Flask, Response
+
 from io import StringIO
 
 DREAMHOST_ACCESS_KEY = os.environ.get('DREAMHOST_ACCESS_KEY')
 DREAMHOST_URL = "https://api.dreamhost.com" 
 CONTENT_TYPE = 'application/external.dns.webhook+json;version=1'
 
-app = Flask(__name__)
+app = flask.Flask(__name__)
 
 # Functions tomake requests to the Dreamhost API using an access token generated from:
 # > https://panel.dreamhost.com/index.cgi?tree=home.api
@@ -91,7 +92,7 @@ def upd_record(record_name, record_type, record_value):
 @app.route("/", methods=["GET"])
 def handle_negotiate():
     try:
-        if request.method == 'GET':
+        if flask.request.method == 'GET':
             return lst_zones(), 200, {'Content-Type': CONTENT_TYPE}
     except Exception as e:
         pass
@@ -100,9 +101,9 @@ def handle_negotiate():
 @app.route("/records", methods=["GET", "POST"]) 
 def handle_records():
     try:
-        if request.method == 'GET':
+        if flask.request.method == 'GET':
             return lst_records(), 200, {'Content-Type': CONTENT_TYPE}
-        if request.method == 'POST':
+        if flask.request.method == 'POST':
             data = json.loads(request.data)
             all_to_del = data.get('delete', []) + data.get('updateOld', [])
             for record in all_to_del:
@@ -122,13 +123,14 @@ def handle_records():
                     )
             return "Changes were accepted", 204
     except Exception as e:
+        print(f"Error: {e}")
         pass
     return "Error listing records", 500
 
 @app.route('/adjustendpoints', methods=['POST'])
 def handle_adjustendpoints():
     try:
-        if request.method == 'POST':
+        if flask.request.method == 'POST':
             data = json.loads(request.data)
             for record in data:
                 upd_record(
@@ -138,9 +140,34 @@ def handle_adjustendpoints():
                 )
             return lst_records(), 200, {'Content-Type': CONTENT_TYPE}    
     except Exception as e:
+        print(f"Error: {e}")
         pass
     return "Error adjusting endpoints", 500
 
+# Needed to convey healthiness and readiness.
+
+@app.route("/health", methods=["GET"])
+def handle_health():
+    try:
+        if flask.request.method == 'GET':
+            return "Healthy", 200
+    except Exception as e:
+        print(f"Error: {e}")
+        pass
+    return "Unhealthy", 500
+
+@app.route("/ready", methods=["GET"])
+def handle_ready():
+    try:
+        if flask.request.method == 'GET':
+            return "Ready", 200
+    except Exception as e:
+        print(f"Error: {e}")
+        pass
+    return "Busy", 500
+
+# Main entry point of application
+
 if __name__ == '__main__':
-    app.run(host='localhost', port=8888)
+    app.run(host='0.0.0.0', port=8888)
 

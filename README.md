@@ -6,7 +6,7 @@ This is a simple webhook for external-dns that transforms dyanmic DNS operations
 kubectl create secret generic dreamhost-credentials --from-literal=api-access-key='DREAMHOST_ACCESS_KEY' -n external-dns
 ```
 
-Once this is done you can write a configuration file that sets up external-dns to use the new webook with this secret API key.
+Once this is done you can create a configuration file called `external-dns-dreamhost-webhook.yaml` that sets up external-dns to use the new webook with this secret API key.
 
 ```yaml
 namespace: external-dns
@@ -15,10 +15,10 @@ provider:
   name: webhook
   webhook:
     image:
-      repository: ghcr.io/asymingt/external-dns-dreamhost-webhook
-      tag: v0.0.1
+      repository: docker.io/asymingt/external-dns-dreamhost-webhook
+      tag: v0.0.2
     env:
-      - name: ACCESS_KEY
+      - name: DREAMHOST_ACCESS_KEY
         valueFrom:
           secretKeyRef:
             name: dreamhost-credentials
@@ -44,5 +44,11 @@ Then install external-dns and configure it to use this webhook:
 ```
 helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
 helm repo update
-helm install external-dns-dreamhost external-dns/external-dns -f external-dns-dreamhost-values.yaml -n external-dns
+helm install external-dns-dreamhost external-dns/external-dns -f external-dns-dreamhost-webhook.yaml -n external-dns
+```
+
+Finally, annotate a service to instruct external-dns to add record for it. For example your domain `nginx.example.org` will now route to this service:
+
+```
+kubectl annotate service nginx "external-dns.alpha.kubernetes.io/hostname=nginx.example.org."
 ```
