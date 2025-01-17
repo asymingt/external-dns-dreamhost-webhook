@@ -50,7 +50,7 @@ extraArgs:
 
 sidecars:
   - name: dreamhost-webhook
-    image: asymingt/external-dns-dreamhost-webhook:v0.1.0
+    image: ghcr.io/asymingt/external-dns-dreamhost-webhook:v0.1.1
     ports:
       - containerPort: 8888
         name: webhook
@@ -101,8 +101,8 @@ provider:
   name: webhook
   webhook:
     image:
-      repository: asymingt/external-dns-dreamhost-webhook
-      tag: v0.0.1
+      repository: ghcr.io/asymingt/external-dns-dreamhost-webhook
+      tag: v0.1.1
     env:
       - name: DREAMHOST_API_KEY
         valueFrom:
@@ -121,9 +121,6 @@ provider:
         port: http-wh-metrics
       initialDelaySeconds: 10
       timeoutSeconds: 5
-
-extraArgs:
-  - --txt-prefix=reg-
 ```
 
 And then:
