@@ -77,7 +77,7 @@ func GetDomainFilter(config Configuration) endpoint.DomainFilter {
 	return domainFilter
 }
 
-// Functions called by the 
+// Functions called by the webook http API
 
 func (p *DreamhostProvider) Records(ctx context.Context) ([]*endpoint.Endpoint, error) {
 	records, err := p.client.ListDNSRecords(ctx)

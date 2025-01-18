@@ -46,7 +46,6 @@ provider: webhook
 
 extraArgs:
   webhook-provider-url: http://localhost:8888
-  txt-prefix: reg-
 
 sidecars:
   - name: dreamhost-webhook
