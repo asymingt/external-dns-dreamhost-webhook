@@ -5,7 +5,7 @@ ExternalDNS is a Kubernetes add-on for automatically managing Domain Name System
 
 To use ExternalDNS with Dreamhost, you need your Dreamhost API token of the account managing your domains, which you can generate by visiting [this page](https://panel.dreamhost.com/?tree=home.api) on the Dreamhost website.
 
-For detailed technical instructions on how the Dreamhost webhook is deployed using the Bitnami Helm charts for ExternalDNS, see[deployment instructions](#kubernetes-deployment).
+For detailed technical instructions on how the Dreamhost webhook is deployed using the Bitnami Helm charts for ExternalDNS, see [deployment instructions](#kubernetes-deployment).
 
 ## Kubernetes Deployment
 
