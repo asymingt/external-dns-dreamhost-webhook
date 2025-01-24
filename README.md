@@ -25,64 +25,7 @@ First, create the Dreamhost secret:
 kubectl create secret generic dreamhost-credentials --from-literal=api-key='<EXAMPLE_PLEASE_REPLACE>' -n external-dns
 ```
 
-### Using the Bitnami chart
-
-Skip this if you already have the Bitnami repository added:
-
-```shell
-helm repo add bitnami https://charts.bitnami.com/bitnami
-```
-
-You can then create the helm values file, for example
-`external-dns-dreamhost-values.yaml`:
-
-```yaml
-image:
-  registry: registry.k8s.io
-  repository: external-dns/external-dns
-  tag: v0.14.0
-
-provider: webhook
-
-extraArgs:
-  webhook-provider-url: http://localhost:8888
-
-sidecars:
-  - name: dreamhost-webhook
-    image: asymingt/external-dns-dreamhost-webhook:v0.1.2
-    ports:
-      - containerPort: 8888
-        name: webhook
-      - containerPort: 8080
-        name: http
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: http
-      initialDelaySeconds: 10
-      timeoutSeconds: 5
-    readinessProbe:
-      httpGet:
-        path: /ready
-        port: http
-      initialDelaySeconds: 10
-      timeoutSeconds: 5
-    env:
-      - name: DREAMHOST_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: dreamhost-credentials
-            key: api-key
-```
-
-And then:
-
-```shell
-# install external-dns with helm
-helm install external-dns-dreamhost bitnami/external-dns -f external-dns-dreamhost-values.yaml -n external-dns
-```
-
-### Using the ExternalDNS chart
+### Using the ExternalDNS helm chart
 
 Skip this if you already have the ExternalDNS repository added:
 
@@ -120,6 +63,7 @@ provider:
         port: http-wh-metrics
       initialDelaySeconds: 10
       timeoutSeconds: 5
+interval: 10m
 ```
 
 And then:
