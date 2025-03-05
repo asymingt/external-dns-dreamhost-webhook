@@ -3,7 +3,7 @@ module github.com/asymingt/external-dns-dreamhost-webhook
 go 1.23.1
 
 require (
-	github.com/adamantal/go-dreamhost v0.1.1
+	github.com/asymingt/go-dreamhost v0.1.2
 	github.com/codingconcepts/env v0.0.0-20240618133406-5b0845441187
 	github.com/sirupsen/logrus v1.9.3
 	sigs.k8s.io/external-dns v0.15.0

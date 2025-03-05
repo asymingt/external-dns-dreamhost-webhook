@@ -3,21 +3,22 @@ package dreamhost
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	dhapi "github.com/adamantal/go-dreamhost/api"
 	"regexp"
+	"strings"
+
+	dhapi "github.com/asymingt/go-dreamhost/api"
+	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/external-dns/endpoint"
 	"sigs.k8s.io/external-dns/plan"
 	"sigs.k8s.io/external-dns/provider"
-	"strings"
 )
 
 type DreamhostProvider struct {
 	provider.BaseProvider
-	client				*dhapi.Client
-	zoneIDNameMapper 	provider.ZoneIDName
-	domainFilter 		endpoint.DomainFilter
-	DryRun 				bool
+	client           *dhapi.Client
+	zoneIDNameMapper provider.ZoneIDName
+	domainFilter     endpoint.DomainFilter
+	DryRun           bool
 }
 
 // Configuration contains the Dreamhost provider's configuration.
@@ -115,7 +116,7 @@ func (p *DreamhostProvider) AdjustEndpoints(endpoints []*endpoint.Endpoint) ([]*
 			})
 			if err != nil {
 				log.Warning(err)
-			} else { 
+			} else {
 				adjustedTargets = append(adjustedTargets, t)
 			}
 		}
